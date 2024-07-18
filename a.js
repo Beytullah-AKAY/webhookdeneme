@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cors());
 app.options('*', cors());
 
-app.get('/webhook', (req, res) => {
+app.get('/', (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
@@ -23,7 +23,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-app.post('/webhook', async (req, res) => {
+app.post('/', async (req, res) => {
   try {
     const body = req.body;
 
@@ -58,7 +58,6 @@ const processStatusUpdate = async (status) => {
     const messageId = status.id;
     const statusType = status.status;
     const recipientId = status.recipient_id;
-    console.log(status)
     console.log(`Mesaj ID: ${messageId}, Durum: ${statusType}, Alıcı: ${recipientId}`);
 
     switch (statusType) {
