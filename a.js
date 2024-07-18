@@ -11,16 +11,7 @@ app.use(cors());
 app.options('*', cors());
 
 app.get('/webhook/whatsapp', (req, res) => {
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
 
-  if (token === VERIFY_TOKEN) {
-    res.status(200).send(challenge);
-    console.log("Webhook onaylandı");
-  } else {
-    res.sendStatus(403);
-    console.log("Webhook reddedildi");
-  }
 });
 
 app.post('/webhook/whatsapp', async (req, res) => {
