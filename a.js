@@ -4,7 +4,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.post('/webhook', (req, res) => {
+app.post('/', (req, res) => {
     const statuses = req.body.statuses;
     
     if (statuses) {
