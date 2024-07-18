@@ -58,7 +58,7 @@ const processStatusUpdate = async (status) => {
     const messageId = status.id;
     const statusType = status.status;
     const recipientId = status.recipient_id;
-
+    console.log(status)
     console.log(`Mesaj ID: ${messageId}, Durum: ${statusType}, Alıcı: ${recipientId}`);
 
     switch (statusType) {
