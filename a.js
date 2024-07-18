@@ -23,7 +23,6 @@ app.get('/', (req, res) => {
   } else {
     res.sendStatus(400);
   }
-  res.send("Merhaba, isteğinizi dinliyorum");
 
 });
 
