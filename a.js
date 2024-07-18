@@ -22,7 +22,10 @@ app.post('/webhook/whatsapp', async (req, res) => {
       for (const entry of body.entry) {
         if (entry.changes && Array.isArray(entry.changes)) {
           for (const change of entry.changes) {
+            console.log(entry)
             if (change.field === 'messages' && change.value && change.value.messages && Array.isArray(change.value.messages)) {
+              console.log(change)
+
               for (const message of change.value.messages) {
                 console.log('Gelen mesaj:', message);
               }
