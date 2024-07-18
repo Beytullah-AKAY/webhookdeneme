@@ -63,7 +63,7 @@ const processStatusUpdate = async (status) => {
 
     switch (statusType) {
       case 'sent':
-        console.log('Mesaj gönderildi (tek tik)');
+        console.log('Mesaj gönderildi');
         break;
       case 'delivered':
         console.log('Mesaj teslim edildi (çift tik)');
@@ -72,7 +72,7 @@ const processStatusUpdate = async (status) => {
         console.log('Mesaj okundu (mavi tik)');
         break;
       default:
-        console.log('Bilinmeyen durum');
+        console.log('MESAJ GÖNDERİLEMEDİ');
     }
   } catch (error) {
     console.error('Durum güncelleme işleme hatası:', error);
