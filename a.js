@@ -1,73 +1,83 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const crypto = require('crypto');
+const cors = require('cors');
 
 const app = express();
-const port = 7000
+const port = 7000;
 
-// Webhook token'ınız
-const WEBHOOK_TOKEN = 'webhook-server-start';
+const VERIFY_TOKEN = "webhook-server-start";
 
-// Webhook URL'iniz
-const WEBHOOK_URL = 'https://webhook.rahatyonetim.com/';
+app.use(express.json());
+app.use(cors());
+app.options('*', cors());
 
-app.use(bodyParser.json());
-
-// Webhook doğrulama
 app.get('/', (req, res) => {
-  if (
-    req.query['hub.mode'] === 'subscribe' &&
-    req.query['hub.verify_token'] === WEBHOOK_TOKEN
-  ) {
-    res.send(req.query['hub.challenge']);
-  } else {
-    res.sendStatus(400);
-  }
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
 
+  if (token === VERIFY_TOKEN) {
+    res.status(200).send(challenge);
+    console.log("Webhook onaylandı");
+  } else {
+    res.sendStatus(403);
+    console.log("Webhook reddedildi");
+  }
 });
 
-// Webhook olaylarını işleme
-app.post('/', (req, res) => {
-  const signature = req.headers['x-hub-signature'];
-  
-  if (!signature) {
-    res.sendStatus(401);
-    return;
-  }
+app.post('/', async (req, res) => {
+  try {
+    const body = req.body;
 
-  const buf = JSON.stringify(req.body);
-  const hmac = crypto.createHmac('sha1', WEBHOOK_TOKEN);
-  const expected = hmac.update(buf).digest('hex');
-
-  if (signature !== `sha1=${expected}`) {
-    res.sendStatus(401);
-    return;
-  }
-
-  const data = req.body;
-
-  if (data.object === 'whatsapp_business_account') {
-    data.entry.forEach(entry => {
-      entry.changes.forEach(change => {
-        if (change.field === 'messages') {
-          const messages = change.value.messages;
-          if (messages) {
-            messages.forEach(message => {
-              console.log('Yeni mesaj:', message);
-              // Burada mesaj durumunu kontrol edebilir ve işleyebilirsiniz
-              if (message.status) {
-                console.log('Mesaj durumu:', message.status);
+    if (body.entry && Array.isArray(body.entry)) {
+      for (const entry of body.entry) {
+        if (entry.changes && Array.isArray(entry.changes)) {
+          for (const change of entry.changes) {
+            if (change.field === 'messages' && change.value && change.value.messages && Array.isArray(change.value.messages)) {
+              for (const message of change.value.messages) {
+                console.log('Gelen mesaj:', message);
               }
-            });
+            }
+            if (change.field === 'messages' && change.value && change.value.statuses && Array.isArray(change.value.statuses)) {
+              for (const status of change.value.statuses) {
+                await processStatusUpdate(status);
+              }
+            }
           }
         }
-      });
-    });
+      }
+    }
+
     res.sendStatus(200);
-  } else {
-    res.sendStatus(404);
+  } catch (error) {
+    console.error('Webhook işleme hatası:', error);
+    res.sendStatus(500);
   }
 });
+
+const processStatusUpdate = async (status) => {
+  try {
+    const messageId = status.id;
+    const statusType = status.status;
+    const recipientId = status.recipient_id;
+
+    console.log(`Mesaj ID: ${messageId}, Durum: ${statusType}, Alıcı: ${recipientId}`);
+
+    switch (statusType) {
+      case 'sent':
+        console.log('Mesaj gönderildi (tek tik)');
+        break;
+      case 'delivered':
+        console.log('Mesaj teslim edildi (çift tik)');
+        break;
+      case 'read':
+        console.log('Mesaj okundu (mavi tik)');
+        break;
+      default:
+        console.log('Bilinmeyen durum');
+    }
+  } catch (error) {
+    console.error('Durum güncelleme işleme hatası:', error);
+  }
+};
 
 app.listen(port, () => {
   console.log(`Webhook sunucusu ${port} portunda çalışıyor`);
