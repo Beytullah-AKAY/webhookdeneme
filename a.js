@@ -17,7 +17,7 @@ app.get('/webhook/whatsapp', (req, res) => {
 app.post('/webhook/whatsapp', async (req, res) => {
   try {
     const body = req.body;
-
+    console.log(body)
     if (body.entry && Array.isArray(body.entry)) {
       for (const entry of body.entry) {
         if (entry.changes && Array.isArray(entry.changes)) {
