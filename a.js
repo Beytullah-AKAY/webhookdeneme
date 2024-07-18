@@ -5,6 +5,13 @@ const app = express();
 app.use(bodyParser.json());
 
 app.post('/', (req, res) => {
+    const webhookTokenHeader = req.headers['webhook-server-start'];
+
+    // Token kontrolü
+    if (webhookTokenHeader !== webhookToken) {
+        return res.status(403).json({ error: 'Geçersiz token' });
+    }
+
     const statuses = req.body.statuses;
     
     if (statuses) {
@@ -26,6 +33,7 @@ app.post('/', (req, res) => {
 
     res.sendStatus(200);
 });
+
 
 app.get("/", (req, res) => {
     res.send("Merhaba, isteğinizi dinliyorum");
