@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cors());
 app.options('*', cors());
 
-app.get('/', (req, res) => {
+app.get('/webhook', (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
   }
 });
 
-app.post('/', async (req, res) => {
+app.post('/webhook', async (req, res) => {
   try {
     const body = req.body;
 
