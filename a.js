@@ -10,22 +10,28 @@ app.use(express.json());
 app.use(cors());
 app.options('*', cors());
 
-app.get('/webhook/whatsapp', (req, res) => {
+app.get('/', (req, res) => {
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
 
+  if (token === VERIFY_TOKEN) {
+    res.status(200).send(challenge);
+    console.log("Webhook onaylandı");
+  } else {
+    res.sendStatus(403);
+    console.log("Webhook reddedildi");
+  }
 });
 
-app.post('/webhook/whatsapp', async (req, res) => {
+app.post('/', async (req, res) => {
   try {
     const body = req.body;
-    console.log(body)
+
     if (body.entry && Array.isArray(body.entry)) {
       for (const entry of body.entry) {
         if (entry.changes && Array.isArray(entry.changes)) {
           for (const change of entry.changes) {
-            console.log(entry)
             if (change.field === 'messages' && change.value && change.value.messages && Array.isArray(change.value.messages)) {
-              console.log(change)
-
               for (const message of change.value.messages) {
                 console.log('Gelen mesaj:', message);
               }
@@ -52,6 +58,7 @@ const processStatusUpdate = async (status) => {
     const messageId = status.id;
     const statusType = status.status;
     const recipientId = status.recipient_id;
+    console.log(status)
     console.log(`Mesaj ID: ${messageId}, Durum: ${statusType}, Alıcı: ${recipientId}`);
 
     switch (statusType) {
